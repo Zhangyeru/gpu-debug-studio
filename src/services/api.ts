@@ -1,0 +1,69 @@
+import type { AnalysisResult, AnalyzeRequest, SampleContentResponse, ShaderSample, SamplesResponse } from '../types';
+
+const BASE = '/api';
+
+class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public detail?: string,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+async function request<T>(url: string, options?: RequestInit): Promise<T> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+  try {
+    const res = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+    });
+
+    const body = await res.json();
+
+    if (!res.ok) {
+      throw new ApiError(
+        body?.error ?? `Request failed with status ${res.status}`,
+        res.status,
+        body?.detail,
+      );
+    }
+
+    return body as T;
+  } catch (err) {
+    if (err instanceof ApiError) throw err;
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new Error('Request timed out');
+    }
+    throw new Error(err instanceof Error ? err.message : 'Network error');
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+export async function fetchSamples(): Promise<ShaderSample[]> {
+  const data = await request<SamplesResponse>(`${BASE}/samples`);
+  return data.samples;
+}
+
+export async function fetchSampleSource(name: string): Promise<string> {
+  const data = await request<SampleContentResponse>(`${BASE}/samples/${encodeURIComponent(name)}`);
+  return data.source;
+}
+
+export async function analyzeShader(source: string, name?: string): Promise<AnalysisResult> {
+  const body: AnalyzeRequest = { shader_source: source };
+  if (name) body.shader_name = name;
+  return request<AnalysisResult>(`${BASE}/analyze`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
