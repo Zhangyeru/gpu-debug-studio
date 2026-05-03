@@ -31,7 +31,7 @@ export default function FileUpload({ onFileContent }: FileUploadProps) {
   return (
     <span className="file-upload">
       <label className="file-upload-label" htmlFor="shader-file-input">
-        Upload
+        上传
       </label>
       <input
         id="shader-file-input"

@@ -6,7 +6,7 @@ from .config import Settings
 from . import shaders
 from .llm_proxy import LLMError, call_llm
 
-app = FastAPI(title="GPU Debug Studio")
+app = FastAPI(title="GPU 调试工作室")
 settings = Settings()
 
 app.add_middleware(
@@ -32,7 +32,7 @@ async def list_samples():
 async def get_sample(name: str):
     source = shaders.load_sample(name)
     if source is None:
-        raise HTTPException(status_code=404, detail={"error": "Sample not found"})
+        raise HTTPException(status_code=404, detail={"error": "未找到该示例"})
     return {"name": name, "source": source}
 
 
@@ -45,12 +45,12 @@ class AnalyzeRequest(BaseModel):
 async def analyze(payload: AnalyzeRequest):
     source = payload.shader_source.strip()
     if not source:
-        raise HTTPException(status_code=400, detail={"error": "Shader source is empty"})
+        raise HTTPException(status_code=400, detail={"error": "Shader 源码为空"})
 
     if not settings.llm_api_key:
         raise HTTPException(
             status_code=503,
-            detail={"error": "LLM is not configured — set LLM_API_KEY in backend/.env"},
+            detail={"error": "LLM 未配置 — 请在 backend/.env 中设置 LLM_API_KEY"},
         )
 
     try:

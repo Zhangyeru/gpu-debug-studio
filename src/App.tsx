@@ -12,7 +12,7 @@ layout(location = 0) out vec4 outColor;
 layout(binding = 0) uniform sampler2D tex0;
 
 void main() {
-  // Write your shader here or load a sample below
+  // 在此编写 Shader 或点击下方示例加载
   outColor = texture(tex0, uv);
 }`;
 
@@ -40,7 +40,7 @@ export default function App() {
       setResult(analysis);
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') return;
-      setError(err instanceof Error ? err.message : 'Analysis failed');
+      setError(err instanceof Error ? err.message : '分析失败');
     } finally {
       setLoading(false);
     }
@@ -71,9 +71,9 @@ export default function App() {
   return (
     <>
       <header className="app-header">
-        <h1>GPU Debug Studio</h1>
+        <h1>GPU 调试工作室</h1>
         <p className="subtitle">
-          Shader algorithm analysis — AI-powered explanations and flowcharts
+          Shader 算法分析 — AI 驱动的算法说明与流程图
         </p>
       </header>
 

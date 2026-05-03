@@ -76,7 +76,7 @@ export default function ShaderEditor({
             onClick={onAnalyze}
             disabled={isEmpty || loading}
           >
-            {loading ? 'Analyzing...' : 'Analyze'}
+            {loading ? '分析中...' : '分析'}
           </button>
         </div>
       </div>

@@ -31,7 +31,7 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
 
     if (!res.ok) {
       throw new ApiError(
-        body?.error ?? `Request failed with status ${res.status}`,
+        body?.error ?? `请求失败，状态码 ${res.status}`,
         res.status,
         body?.detail,
       );
@@ -41,9 +41,9 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   } catch (err) {
     if (err instanceof ApiError) throw err;
     if (err instanceof DOMException && err.name === 'AbortError') {
-      throw new Error('Request timed out');
+      throw new Error('请求超时');
     }
-    throw new Error(err instanceof Error ? err.message : 'Network error');
+    throw new Error(err instanceof Error ? err.message : '网络错误');
   } finally {
     clearTimeout(timeoutId);
   }

@@ -28,7 +28,7 @@ def _parse_json_response(raw: str) -> dict:
         except json.JSONDecodeError:
             pass
 
-    raise LLMError("LLM returned unparseable response — no valid JSON found")
+    raise LLMError("LLM 返回了无法解析的内容 — 未找到合法 JSON")
 
 
 def _validate_response(parsed: dict) -> None:
@@ -37,10 +37,10 @@ def _validate_response(parsed: dict) -> None:
 
     if not explanation or not isinstance(explanation, str):
         raise LLMError(
-            "LLM response missing or invalid 'explanation_markdown' field"
+            "LLM 响应缺少或无效的 'explanation_markdown' 字段"
         )
     if not mermaid or not isinstance(mermaid, str):
-        raise LLMError("LLM response missing or invalid 'mermaid_code' field")
+        raise LLMError("LLM 响应缺少或无效的 'mermaid_code' 字段")
 
 
 PROXY_KEYS = [
@@ -81,9 +81,9 @@ async def call_llm(shader_source: str, settings: Settings) -> dict:
                     },
                 )
             except httpx.TimeoutException:
-                raise LLMError("LLM request timed out", status_code=503)
+                raise LLMError("LLM 请求超时", status_code=503)
             except httpx.RequestError as e:
-                raise LLMError(f"LLM request failed: {e}", status_code=503)
+                raise LLMError(f"LLM 请求失败：{e}", status_code=503)
     finally:
         for k, v in saved.items():
             os.environ[k] = v
@@ -92,17 +92,17 @@ async def call_llm(shader_source: str, settings: Settings) -> dict:
 
     if response.status_code != 200:
         raise LLMError(
-            f"LLM API returned {response.status_code}", status_code=502
+            f"LLM API 返回状态码 {response.status_code}", status_code=502
         )
 
     data = response.json()
     choices = data.get("choices")
     if not choices or not isinstance(choices, list):
-        raise LLMError("LLM API response missing 'choices'", status_code=502)
+        raise LLMError("LLM API 响应缺少 'choices' 字段", status_code=502)
 
     content = choices[0].get("message", {}).get("content", "")
     if not content:
-        raise LLMError("LLM returned empty response", status_code=502)
+        raise LLMError("LLM 返回了空响应", status_code=502)
 
     parsed = _parse_json_response(content)
     _validate_response(parsed)

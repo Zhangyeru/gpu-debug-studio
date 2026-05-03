@@ -41,7 +41,7 @@ export default function SampleSelector({ onSelect }: SampleSelectorProps) {
           onClick={() => handleClick(s)}
           disabled={loading === s.name}
         >
-          {loading === s.name ? 'Loading...' : s.label}
+          {loading === s.name ? '加载中...' : s.label}
         </button>
       ))}
     </div>

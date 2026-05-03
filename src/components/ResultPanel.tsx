@@ -27,13 +27,13 @@ export default function ResultPanel({
           className={`tab-btn ${tab === 'explanation' ? 'active' : ''}`}
           onClick={() => setTab('explanation')}
         >
-          Explanation
+          算法说明
         </button>
         <button
           className={`tab-btn ${tab === 'flowchart' ? 'active' : ''}`}
           onClick={() => setTab('flowchart')}
         >
-          Flowchart
+          流程图
         </button>
       </div>
 
@@ -43,7 +43,7 @@ export default function ResultPanel({
 
       {!loading && !error && !result && (
         <div className="state-placeholder">
-          <p>Paste or load a shader, then click <strong>Analyze</strong> to see the algorithm explained here.</p>
+          <p>粘贴代码或加载示例 Shader，然后点击 <strong>分析</strong> 查看算法说明。</p>
         </div>
       )}
 

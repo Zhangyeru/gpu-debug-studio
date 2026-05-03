@@ -3,10 +3,10 @@ from pathlib import Path
 SAMPLES_DIR = Path(__file__).resolve().parent.parent / "samples"
 
 SAMPLE_META = {
-    "texture_loop.frag": "Texture Loop",
-    "branchy.frag": "Conditional Branching",
-    "conversion.frag": "Type Conversion",
-    "simple_blur.frag": "Gaussian Blur",
+    "texture_loop.frag": "纹理循环",
+    "branchy.frag": "条件分支",
+    "conversion.frag": "类型转换",
+    "simple_blur.frag": "高斯模糊",
 }
 
 

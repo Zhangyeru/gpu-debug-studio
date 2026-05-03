@@ -29,7 +29,7 @@ export default function FlowchartTab({ mermaidCode }: FlowchartTabProps) {
     try {
       mermaid.parse(mermaidCode);
     } catch {
-      setParseError('Mermaid syntax error — the generated diagram may be invalid.');
+      setParseError('Mermaid 语法错误，生成的流程图可能无效。');
       return;
     }
 
@@ -53,7 +53,7 @@ export default function FlowchartTab({ mermaidCode }: FlowchartTabProps) {
       })
       .catch(() => {
         if (!cancelled) {
-          setParseError('Failed to render diagram.');
+          setParseError('流程图渲染失败。');
         }
       });
 
