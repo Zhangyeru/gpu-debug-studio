@@ -7,6 +7,7 @@ SAMPLE_META = {
     "branchy.frag": "条件分支",
     "conversion.frag": "类型转换",
     "simple_blur.frag": "高斯模糊",
+    "ssao.frag": "SSAO",
 }
 
 

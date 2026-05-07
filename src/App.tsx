@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
 import { analyzeShader } from './services/api';
 import SampleSelector from './components/SampleSelector';
-import ShaderEditor from './components/ShaderEditor';
-import ResultPanel from './components/ResultPanel';
+import ShaderEditor, { type ShaderEditorHandle } from './components/ShaderEditor';
+import ResultPanel, { type ResultPanelHandle } from './components/ResultPanel';
 import type { AnalysisResult } from './types';
 
 const INITIAL_SHADER = `#version 450
@@ -23,6 +23,8 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const editorRef = useRef<ShaderEditorHandle>(null);
+  const resultPanelRef = useRef<ResultPanelHandle>(null);
 
   const handleAnalyze = useCallback(async () => {
     const source = shaderSource.trim();
@@ -68,6 +70,16 @@ export default function App() {
     [],
   );
 
+  // Right explanation → left code highlight
+  const handleLineClick = useCallback((from: number, to: number) => {
+    editorRef.current?.highlightLines(from, to);
+  }, []);
+
+  // Left code → right explanation highlight
+  const handleCodeLineClick = useCallback((line: number) => {
+    resultPanelRef.current?.scrollToLine(line);
+  }, []);
+
   return (
     <>
       <header className="app-header">
@@ -81,18 +93,22 @@ export default function App() {
 
       <main className="layout">
         <ShaderEditor
+          ref={editorRef}
           value={shaderSource}
           filename={shaderName}
           onChange={setShaderSource}
           onFileContent={handleFileContent}
           onAnalyze={handleAnalyze}
           loading={loading}
+          onLineClick={handleCodeLineClick}
         />
         <ResultPanel
+          ref={resultPanelRef}
           result={result}
           loading={loading}
           error={error}
           onDismissError={() => setError(null)}
+          onLineClick={handleLineClick}
         />
       </main>
     </>

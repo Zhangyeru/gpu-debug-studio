@@ -1,6 +1,6 @@
 export default function LoadingState() {
   return (
-    <div className="tab-content">
+    <div className="explanation-content">
       {Array.from({ length: 8 }).map((_, i) => (
         <div
           key={i}

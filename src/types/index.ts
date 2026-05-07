@@ -5,7 +5,7 @@ export type ShaderSample = {
 
 export type AnalysisResult = {
   explanation_markdown: string;
-  mermaid_code: string;
+  optimization_markdown: string;
   model_used: string;
   elapsed_ms: number;
 };

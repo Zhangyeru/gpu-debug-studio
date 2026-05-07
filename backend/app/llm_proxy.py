@@ -33,14 +33,16 @@ def _parse_json_response(raw: str) -> dict:
 
 def _validate_response(parsed: dict) -> None:
     explanation = parsed.get("explanation_markdown")
-    mermaid = parsed.get("mermaid_code")
+    optimization = parsed.get("optimization_markdown")
 
     if not explanation or not isinstance(explanation, str):
         raise LLMError(
             "LLM 响应缺少或无效的 'explanation_markdown' 字段"
         )
-    if not mermaid or not isinstance(mermaid, str):
-        raise LLMError("LLM 响应缺少或无效的 'mermaid_code' 字段")
+    if not optimization or not isinstance(optimization, str):
+        raise LLMError(
+            "LLM 响应缺少或无效的 'optimization_markdown' 字段"
+        )
 
 
 PROXY_KEYS = [
@@ -65,7 +67,7 @@ async def call_llm(shader_source: str, settings: Settings) -> dict:
             saved[k] = os.environ.pop(k)
 
     try:
-        async with httpx.AsyncClient(timeout=60.0) as client:
+        async with httpx.AsyncClient(timeout=300.0) as client:
             try:
                 response = await client.post(
                     settings.llm_api_url,
@@ -109,7 +111,7 @@ async def call_llm(shader_source: str, settings: Settings) -> dict:
 
     return {
         "explanation_markdown": parsed["explanation_markdown"],
-        "mermaid_code": parsed["mermaid_code"],
+        "optimization_markdown": parsed["optimization_markdown"],
         "model_used": settings.llm_model,
         "elapsed_ms": round(elapsed * 1000),
     }
