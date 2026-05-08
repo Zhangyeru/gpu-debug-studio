@@ -141,7 +141,80 @@ gpu-debug-studio/
 │       ├── llm_proxy.py          # LLM API 调用 + JSON 解析
 │       ├── prompts.py            # System Prompt 模板
 │       └── shaders.py            # 示例 Shader 管理
+├── nginx.conf                    # Nginx 反向代理配置
+├── gpu-debug-studio.service      # systemd 服务文件
+├── DESIGN.md                     # 软件设计文档
+├── AI_CODING.md                  # AI Coding 总结
 └── README.md
+```
+
+## 生产部署
+
+### 1. 构建前端
+
+```bash
+npm run build       # 输出到 dist/
+```
+
+### 2. 配置后端服务
+
+```bash
+# 编辑 systemd 服务文件中的路径（如需要）
+# 然后安装并启动
+sudo cp gpu-debug-studio.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now gpu-debug-studio
+sudo systemctl status gpu-debug-studio
+```
+
+### 3. 配置 Nginx
+
+```bash
+# 安装 nginx
+sudo apt install nginx
+
+# 安装配置
+sudo cp nginx.conf /etc/nginx/sites-available/gpu-debug-studio
+sudo ln -s /etc/nginx/sites-available/gpu-debug-studio /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default   # 移除默认站点
+
+# 测试并重载
+sudo nginx -t
+sudo nginx -s reload
+```
+
+### 4. 访问
+
+打开浏览器访问 `http://<服务器IP>`，nginx 监听 80 端口，自动分发请求：
+
+```
+用户请求
+  │
+  ▼
+Nginx (:80)
+  ├── /api/*   ──proxy──► uvicorn (:8000)
+  ├── /health  ──proxy──► uvicorn (:8000)
+  └── /*       ──静态──► dist/index.html
+```
+
+### 5. 常用运维命令
+
+```bash
+# 查看后端状态
+sudo systemctl status gpu-debug-studio
+
+# 查看后端日志
+sudo journalctl -u gpu-debug-studio -f
+
+# 重启后端
+sudo systemctl restart gpu-debug-studio
+
+# 更新前端后重新构建
+npm run build
+
+# 查看 nginx 日志
+sudo tail -f /var/log/nginx/gpu-debug-studio-access.log
+sudo tail -f /var/log/nginx/gpu-debug-studio-error.log
 ```
 
 ## API 端点

@@ -1,0 +1,26 @@
+# GPU Debug Studio — systemd 服务文件
+#
+# 使用方式：
+#   sudo cp gpu-debug-studio.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now gpu-debug-studio
+#
+# 查看状态：
+#   sudo systemctl status gpu-debug-studio
+# 查看日志：
+#   sudo journalctl -u gpu-debug-studio -f
+
+[Unit]
+Description=GPU Debug Studio Backend
+After=network.target
+
+[Service]
+Type=simple
+User=anfield
+WorkingDirectory=/home/anfield/project/gpu-debug-studio/backend
+ExecStart=/home/anfield/anaconda3/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
