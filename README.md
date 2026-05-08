@@ -175,11 +175,12 @@ sudo cp gpu-debug-studio.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now gpu-debug-studio
 
-# 6. 配置 Nginx 反向代理
+# 6. 修复权限 + 配置 Nginx 反向代理
+sudo chmod o+x /home/anfield                                      # nginx 需要遍历 home 目录
 sudo cp nginx.conf /etc/nginx/sites-available/gpu-debug-studio
 sudo ln -sf /etc/nginx/sites-available/gpu-debug-studio /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
-sudo nginx -t && sudo nginx -s reload
+sudo nginx -t && sudo systemctl restart nginx
 
 # 7. 验证
 curl http://localhost/health     # → {"status":"ok"}
@@ -232,11 +233,18 @@ sudo systemctl enable --now gpu-debug-studio
 #### 第五步：配置 Nginx
 
 ```bash
+# nginx 需要访问 /home/anfield 目录下的 dist/ 文件
+# 方式一（推荐）：开放 home 目录的执行权限
+sudo chmod o+x /home/anfield
+
+# 方式二：在 nginx.conf 中将 user 改为当前用户
+# sudo sed -i 's/^user.*/user anfield;/' /etc/nginx/nginx.conf
+
 sudo cp nginx.conf /etc/nginx/sites-available/gpu-debug-studio
 sudo ln -sf /etc/nginx/sites-available/gpu-debug-studio /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default    # 移除默认站点
 sudo nginx -t                                   # 测试配置
-sudo nginx -s reload                            # 重载生效
+sudo systemctl restart nginx                    # 启动/重启 nginx
 ```
 
 #### 第六步：验证部署
