@@ -57,11 +57,11 @@ LLM_MAX_TOKENS=12288
 
 ### 3. 启动服务
 
-**终端 1 — 启动后端（端口 8000）：**
+**终端 1 — 启动后端（端口 8002）：**
 
 ```bash
 cd backend
-uvicorn app.main:app --host 127.0.0.1 --port 8000
+uvicorn app.main:app --host 127.0.0.1 --port 8002
 ```
 
 **终端 2 — 启动前端（端口 5173）：**
@@ -242,7 +242,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now gpu-debug-studio
 
 # 开发调试可不使用 systemd，直接运行：
-# cd backend && uvicorn app.main:app --host 127.0.0.1 --port 8000
+# cd backend && uvicorn app.main:app --host 127.0.0.1 --port 8002
 ```
 
 #### 第五步：配置 Nginx
@@ -305,7 +305,7 @@ hostname -I
        │         │
        │ 静态文件  │ /api/* 代理
        ▼         ▼
-    dist/    uvicorn (:8000)
+    dist/    uvicorn (:8002)
                   │
                   ▼
             LLM API
@@ -344,7 +344,7 @@ sudo tail -f /var/log/nginx/gpu-debug-studio-access.log  # 访问日志
 sudo tail -f /var/log/nginx/gpu-debug-studio-error.log   # 错误日志
 
 # 查看端口占用
-sudo ss -tlnp | grep -E '80|8000'
+sudo ss -tlnp | grep -E '80|8002'
 ```
 
 ## API 端点

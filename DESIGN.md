@@ -49,9 +49,9 @@ GPU Debug Studio 是一款面向 GPU Shader 开发者的算法分析工具。开
 │           ↕                │  scrollToLine(line)        ││
 │      App.tsx 双向桥接       └───────────────────────────┘│
 └───────────────────┬─────────────────────────────────────┘
-                    │ Vite proxy: /api → :8000
+                    │ Vite proxy: /api → :8002
 ┌───────────────────▼─────────────────────────────────────┐
-│                 Backend (:8000)                          │
+│                 Backend (:8002)                          │
 │  ┌──────────────────────────────────────────────────┐   │
 │  │              FastAPI Application                   │   │
 │  │  GET  /health                                     │   │
@@ -79,8 +79,8 @@ GPU Debug Studio 是一款面向 GPU Shader 开发者的算法分析工具。开
 
 开发环境采用前后端分离 + Vite 代理模式：
 
-- **前端**：Vite Dev Server 监听 `:5173`，`/api` 和 `/health` 请求代理到 `:8000`
-- **后端**：uvicorn 监听 `:8000`，CORS 全开（开发阶段）
+- **前端**：Vite Dev Server 监听 `:5173`，`/api` 和 `/health` 请求代理到 `:8002`
+- **后端**：uvicorn 监听 `:8002`，CORS 全开（开发阶段）
 - **无需 Nginx**：开发阶段 Vite proxy 即可解决跨域
 
 ---

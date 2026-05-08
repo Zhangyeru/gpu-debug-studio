@@ -18,7 +18,7 @@ After=network.target
 Type=simple
 User=anfield
 WorkingDirectory=/home/anfield/project/gpu-debug-studio/backend
-ExecStart=/home/anfield/anaconda3/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+ExecStart=/home/anfield/anaconda3/bin/uvicorn app.main:app --host 127.0.0.1 --port 8002
 Restart=on-failure
 RestartSec=5
 

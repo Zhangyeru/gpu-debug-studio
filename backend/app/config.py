@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.3
     llm_max_tokens: int = 4096
     host: str = "0.0.0.0"
-    port: int = 8000
+    port: int = 8002
     samples_dir: str = ""
 
     model_config = {"env_file": str(_ENV_FILE), "env_file_encoding": "utf-8"}
