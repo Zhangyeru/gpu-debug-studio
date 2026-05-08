@@ -150,71 +150,162 @@ gpu-debug-studio/
 
 ## 生产部署
 
-### 1. 构建前端
+以下命令在 Ubuntu/Debian 服务器上一次性完成部署。
+
+### 一键部署
 
 ```bash
-npm run build       # 输出到 dist/
-```
+# 1. 安装系统依赖
+sudo apt update && sudo apt install -y nginx python3-pip nodejs npm
 
-### 2. 配置后端服务
+# 2. 安装项目依赖
+cd /home/anfield/project/gpu-debug-studio
+npm install
+cd backend && pip install -e . && cd ..
 
-```bash
-# 编辑 systemd 服务文件中的路径（如需要）
-# 然后安装并启动
+# 3. 配置 LLM（替换为你的 API Key）
+cp backend/.env.example backend/.env
+sed -i 's/sk-your-api-key-here/sk-你的真实密钥/' backend/.env
+
+# 4. 构建前端
+npm run build
+
+# 5. 启动后端（systemd 托管）
 sudo cp gpu-debug-studio.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now gpu-debug-studio
-sudo systemctl status gpu-debug-studio
-```
 
-### 3. 配置 Nginx
-
-```bash
-# 安装 nginx
-sudo apt install nginx
-
-# 安装配置
+# 6. 配置 Nginx 反向代理
 sudo cp nginx.conf /etc/nginx/sites-available/gpu-debug-studio
-sudo ln -s /etc/nginx/sites-available/gpu-debug-studio /etc/nginx/sites-enabled/
-sudo rm -f /etc/nginx/sites-enabled/default   # 移除默认站点
+sudo ln -sf /etc/nginx/sites-available/gpu-debug-studio /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t && sudo nginx -s reload
 
-# 测试并重载
-sudo nginx -t
-sudo nginx -s reload
+# 7. 验证
+curl http://localhost/health     # → {"status":"ok"}
+curl http://localhost/api/samples # → {"samples":[...]}
 ```
 
-### 4. 访问
+### 分步说明
 
-打开浏览器访问 `http://<服务器IP>`，nginx 监听 80 端口，自动分发请求：
-
-```
-用户请求
-  │
-  ▼
-Nginx (:80)
-  ├── /api/*   ──proxy──► uvicorn (:8000)
-  ├── /health  ──proxy──► uvicorn (:8000)
-  └── /*       ──静态──► dist/index.html
-```
-
-### 5. 常用运维命令
+#### 第一步：安装依赖
 
 ```bash
-# 查看后端状态
-sudo systemctl status gpu-debug-studio
+sudo apt update
+sudo apt install -y nginx python3-pip nodejs npm
+cd /home/anfield/project/gpu-debug-studio
 
-# 查看后端日志
-sudo journalctl -u gpu-debug-studio -f
+# 前端依赖
+npm install
+
+# 后端依赖
+cd backend
+pip install -e .
+cd ..
+```
+
+#### 第二步：配置 LLM
+
+```bash
+cp backend/.env.example backend/.env
+vim backend/.env    # 填入 LLM_API_KEY、LLM_MODEL 等
+```
+
+#### 第三步：构建前端
+
+```bash
+npm run build       # 输出到 dist/，由 nginx 直接托管
+```
+
+#### 第四步：启动后端
+
+```bash
+# 安装 systemd 服务（开机自启 + 异常自动重启）
+sudo cp gpu-debug-studio.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now gpu-debug-studio
+
+# 开发调试可不使用 systemd，直接运行：
+# cd backend && uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+#### 第五步：配置 Nginx
+
+```bash
+sudo cp nginx.conf /etc/nginx/sites-available/gpu-debug-studio
+sudo ln -sf /etc/nginx/sites-available/gpu-debug-studio /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default    # 移除默认站点
+sudo nginx -t                                   # 测试配置
+sudo nginx -s reload                            # 重载生效
+```
+
+#### 第六步：验证部署
+
+```bash
+# 健康检查
+curl http://localhost/health
+# → {"status":"ok"}
+
+# 示例列表
+curl http://localhost/api/samples
+# → {"samples":[...]}
+
+# 分析测试
+curl -X POST http://localhost/api/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"shader_source":"#version 450\nvoid main(){ outColor=vec4(1.0); }"}'
+```
+
+### 请求链路
+
+```
+浏览器 → http://<server>
+           │
+           ▼
+      Nginx (:80)
+       │         │
+       │ 静态文件  │ /api/* 代理
+       ▼         ▼
+    dist/    uvicorn (:8000)
+                  │
+                  ▼
+            LLM API
+```
+
+### 更新部署
+
+```bash
+# 拉取最新代码
+git pull
+
+# 更新依赖
+npm install
+cd backend && pip install -e . && cd ..
+
+# 重新构建前端
+npm run build
 
 # 重启后端
 sudo systemctl restart gpu-debug-studio
+```
 
-# 更新前端后重新构建
-npm run build
+### 常用运维命令
 
-# 查看 nginx 日志
-sudo tail -f /var/log/nginx/gpu-debug-studio-access.log
-sudo tail -f /var/log/nginx/gpu-debug-studio-error.log
+```bash
+# 后端
+sudo systemctl status gpu-debug-studio      # 查看状态
+sudo journalctl -u gpu-debug-studio -f      # 实时日志
+sudo systemctl restart gpu-debug-studio     # 重启
+sudo systemctl stop gpu-debug-studio        # 停止
+
+# Nginx
+sudo nginx -t                                # 测试配置
+sudo nginx -s reload                         # 热重载
+sudo tail -f /var/log/nginx/gpu-debug-studio-access.log  # 访问日志
+sudo tail -f /var/log/nginx/gpu-debug-studio-error.log   # 错误日志
+
+# 查看端口占用
+sudo ss -tlnp | grep -E '80|8000'
 ```
 
 ## API 端点
