@@ -256,6 +256,22 @@ curl -X POST http://localhost/api/analyze \
   -d '{"shader_source":"#version 450\nvoid main(){ outColor=vec4(1.0); }"}'
 ```
 
+#### 第七步：开放防火墙与局域网访问
+
+```bash
+# 开放 HTTP 端口（80）
+sudo ufw allow 80/tcp
+sudo ufw status
+
+# 查看本机局域网 IP
+hostname -I
+# → 例如 192.168.1.100
+```
+
+其他电脑浏览器访问 `http://192.168.1.100` 即可使用。
+
+> nginx 已配置 `server_name _;`，接受所有来源的域名和 IP 访问。后端 uvicorn 绑定 `127.0.0.1`，仅通过 nginx 代理对外暴露，安全且高效。
+
 ### 请求链路
 
 ```
